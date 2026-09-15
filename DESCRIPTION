@@ -1,0 +1,41 @@
+Package: staggeredGMM
+Title: GMM Estimation of Treatment Effects Under Staggered Adoption
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Rishabh", family = "Bijani",
+           email = "rishabhbijani@gmail.com",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0009-0003-9636-1774")),
+    person(given = "Parush", family = "Arora",
+           role = c("aut", "cph"),
+           comment = c(ORCID = "0009-0004-6571-3850"))
+    )
+Description: Estimates cohort-by-time average treatment effects under
+    staggered treatment adoption by the generalized method of moments.
+    Three weighting schemes are provided, corresponding to a
+    pooled stationary covariance, a cohort-specific stationary covariance,
+    and an unrestricted within-cohort covariance. Optional adjustment for
+    baseline covariates by outcome regression, and a serial-correlation
+    robust over-identification test of parallel trends and no
+    anticipation, are also supported. The methods are described in Arora
+    and Bijani (2026) <doi:10.2139/ssrn.6558759>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: fixest, MASS, stats, utils
+Suggests: covr, data.table, knitr, rmarkdown, testthat (>= 3.1.5)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+LazyData: true
+URL: https://github.com/RishabhBijani/staggeredGMM
+BugReports: https://github.com/RishabhBijani/staggeredGMM/issues
+Config/roxygen2/version: 8.0.0
+NeedsCompilation: no
+Packaged: 2026-09-06 17:00:22 UTC; rishabhbijani
+Author: Rishabh Bijani [aut, cre, cph] (ORCID:
+    <https://orcid.org/0009-0003-9636-1774>),
+  Parush Arora [aut, cph] (ORCID:
+    <https://orcid.org/0009-0004-6571-3850>)
+Maintainer: Rishabh Bijani <rishabhbijani@gmail.com>
+Repository: CRAN
+Date/Publication: 2026-09-15 11:00:10 UTC

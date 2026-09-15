@@ -1,0 +1,19 @@
+citHeader("To cite staggeredGMM in publications, please cite the software and the paper describing the method:")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "staggeredGMM: GMM Estimation of Treatment Effects Under Staggered Adoption",
+  author  = c(person("Rishabh", "Bijani"), person("Parush", "Arora")),
+  year    = "2026",
+  note    = "R package version 0.1.0",
+  url     = "https://github.com/RishabhBijani/staggeredGMM"
+)
+
+bibentry(
+  bibtype = "Unpublished",
+  title   = "Estimating Treatment Effects under Staggered Timing and Non-Spherical Errors",
+  author  = c(person("Parush", "Arora"), person("Rishabh", "Bijani")),
+  year    = "2026",
+  note    = "Available at SSRN",
+  doi     = "10.2139/ssrn.6558759"
+)

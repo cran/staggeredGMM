@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting started with staggeredGMM</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting started with staggeredGMM</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(staggeredGMM)</span></code></pre></div>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p><code>staggeredGMM</code> estimates cohort-by-time average treatment
+effects (CATTs) under staggered treatment adoption by the generalized
+method of moments, as proposed in</p>
+<blockquote>
+<p>Arora, P. and Bijani, R. (2026). “Estimating Treatment Effects under
+Staggered Timing and Non-Spherical Errors.” Available at SSRN: <a href="https://doi.org/10.2139/ssrn.6558759" class="uri">https://doi.org/10.2139/ssrn.6558759</a></p>
+</blockquote>
+<p>Only <em>clean</em> two-by-two difference-in-differences comparisons
+enter the moment system: a treated cohort against a never-treated group,
+or against a cohort not yet treated at the relevant period.</p>
+<p>This vignette covers how to call the estimator and what it returns.
+For the methodology, the choice among the three weighting schemes, and
+the simulation and empirical evidence, see the paper.</p>
+</div>
+<div id="data-coding-conventions" class="section level2">
+<h2>Data coding conventions</h2>
+<p><code>gmm_staggered()</code> has the following input
+requirements:</p>
+<ul>
+<li>one row per unit-period, with no duplicated unit-period pair;</li>
+<li>a numeric outcome (factor, character and logical outcomes are
+errors);</li>
+<li>integer-valued time and cohort columns;</li>
+<li>the cohort constant within unit, with <code>0</code> for
+never-treated units;</li>
+<li>no period absent from the whole panel;</li>
+<li>no unit treated at or before the first observed period.</li>
+</ul>
+<p>A missing outcome is fine, and is what an unbalanced panel looks
+like. A missing unit id, period or cohort is an error, since the row
+cannot be placed in the panel at all.</p>
+<p>Two conventions are worth stating explicitly. First, a unit whose
+cohort falls <em>after</em> the last observed period is untreated
+throughout the window, so it is pooled with the never-treated group as a
+clean control rather than discarded. Second, a unit treated at or before
+the first observed period has no pre-treatment period at all, so none of
+its effects is identified; rather than return zeros for those cells and
+contaminate the aggregate, the estimator stops and names the offending
+cohort.</p>
+</div>
+<div id="a-first-estimate" class="section level2">
+<h2>A first estimate</h2>
+<p><code>sim_panel</code> is a balanced synthetic panel: 60 units over
+33 periods, five treated cohorts and a never-treated group.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(sim_panel, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                     <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>fit</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; Staggered-adoption GMM estimator</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; Weighting: pooled Toeplitz (GMM-T)</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;   Units                       60</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;   Periods                     33</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;   Treated cohorts              5</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;   CATTs (identified)     90 (90)</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;   Clean comparisons         1935</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;   Moment-space rank          160</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;   Iterations                   7</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;   Converged                  yes</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Treated-observation ATT       -16.6321  (se 0.2522) </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Cohort-equal ATT              -15.5701  (se 0.2521)</span></span></code></pre></div>
+<p>The never-treated group was detected automatically.
+<code>never_treated = TRUE</code> requires one and errors if none
+exists; <code>never_treated = FALSE</code> excludes them.</p>
+</div>
+<div id="what-is-returned" class="section level2">
+<h2>What is returned</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">head</span>(fit<span class="sc">$</span>catt)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt;    g  t event_time  estimate std_error identified n_comparisons</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; 1 10 10          0 -16.01541 0.3200093       TRUE            45</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; 2 10 11          1 -15.67617 0.3786223       TRUE            45</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 3 10 12          2 -15.98558 0.4040038       TRUE            45</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 4 10 13          3 -16.42134 0.4216487       TRUE            36</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 5 10 14          4 -16.48369 0.4310857       TRUE            36</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 6 10 15          5 -16.92851 0.4391031       TRUE            36</span></span></code></pre></div>
+<p><code>catt</code> gives one row per cohort-by-time cell, with the
+event time, the estimate and its standard error, whether the cell is
+identified, and how many clean comparisons anchor it.
+<code>coef()</code>, <code>vcov()</code> and <code>confint()</code> work
+as usual:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">coef</span>(fit))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt;   g10:t10   g10:t11   g10:t12   g10:t13   g10:t14   g10:t15 </span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; -16.01541 -15.67617 -15.98558 -16.42134 -16.48369 -16.92851</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">confint</span>(fit))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;             2.5 %    97.5 %</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; g10:t10 -16.64262 -15.38821</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; g10:t11 -16.41826 -14.93408</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; g10:t12 -16.77741 -15.19375</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; g10:t13 -17.24775 -15.59492</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; g10:t14 -17.32860 -15.63877</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; g10:t15 -17.78914 -16.06789</span></span></code></pre></div>
+</div>
+<div id="the-two-aggregates" class="section level2">
+<h2>The two aggregates</h2>
+<p>Two scalar summaries are reported, and they answer different
+questions.</p>
+<ul>
+<li><strong><code>CW</code>, treated-observation weighting.</strong>
+Every treated unit-period gets equal weight, so a cohort observed for
+longer contributes more total weight. This is the aggregation used
+throughout the paper, and it coincides with the “simple” aggregation of
+Callaway and Sant’Anna (2021).</li>
+<li><strong><code>EW</code>, cohort-equal weighting.</strong> Each
+treated cohort gets total weight <code>1/K</code>, spread equally over
+its own post-treatment window, so exposure length does not affect a
+cohort’s influence.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">CW =</span> fit<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate, <span class="at">EW =</span> fit<span class="sc">$</span>aggregate<span class="sc">$</span>EW<span class="sc">$</span>estimate)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt;        CW        EW </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; -16.63214 -15.57012</span></span></code></pre></div>
+<p>On this design the true values are <code>-16.79375</code> and
+<code>-15.82020</code> respectively; they differ because earlier cohorts
+are observed for more post-treatment periods. Neither is more correct
+than the other. For any other target, weight
+<code>fit$catt$estimate</code> directly.</p>
+</div>
+<div id="choosing-a-weighting" class="section level2">
+<h2>Choosing a weighting</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>fit_ht <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(sim_panel, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                        <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                        <span class="at">weighting =</span> <span class="st">&quot;cohort_toeplitz&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">c</span>(<span class="at">pooled =</span> fit<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate, <span class="at">cohort =</span> fit_ht<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;    pooled    cohort </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; -16.63214 -16.61543</span></span></code></pre></div>
+<p>All three weightings target the same CATT vector using the same
+moment conditions. They do not generally return the same numbers: the
+system is over-identified, so a different weighting matrix gives a
+different estimate. Which to prefer is a methodological question the
+paper addresses.</p>
+</div>
+<div id="convergence" class="section level2">
+<h2>Convergence</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">unlist</span>(fit<span class="sc">$</span>convergence[<span class="fu">c</span>(<span class="st">&quot;converged&quot;</span>, <span class="st">&quot;solve_ok&quot;</span>, <span class="st">&quot;termination&quot;</span>, <span class="st">&quot;n_iter&quot;</span>)])</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt;   converged    solve_ok termination      n_iter </span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt;      &quot;TRUE&quot;      &quot;TRUE&quot; &quot;converged&quot;         &quot;7&quot;</span></span></code></pre></div>
+<p><code>converged</code> is <code>TRUE</code> only when the largest
+change in any CATT fell below <code>tol</code>. It is deliberately
+distinct from <code>solve_ok</code>, which records merely that a
+weighted solve succeeded; a run can solve successfully at every
+iteration and still exhaust <code>max_iter</code> without converging.
+<code>termination</code> says why the iteration stopped.</p>
+<p><code>max_iter</code> defaults to 100 because the iteration can
+converge linearly at a slow rate.</p>
+<p>On this design the unrestricted weighting cannot complete a weighted
+step at all:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>fit_u <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(sim_panel, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                       <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                       <span class="at">weighting =</span> <span class="st">&quot;unrestricted&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; Warning: No weighted GMM step could be completed (termination:</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; singular_normal_equations). The reported estimates are the identity-weighted</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; seed, not a unrestricted-weighted estimator, and standard errors use the</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; sandwich fallback. The estimated weighting matrix supports 60 independent</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; moment direction(s), but 90 effect(s) must be identified. A cohort-specific</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; covariance carries more parameters than a short panel with few units per cohort</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; can support; a more parsimonious `weighting`, or more units, is needed for this</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; design.</span></span></code></pre></div>
+<p>The estimate returned in that case is the identity-weighted seed, not
+an unrestricted-weighted GMM estimator, which is why it always warns.
+Failing to <em>converge</em> after a weighted step did run is a
+different matter, and is common enough under this weighting that it does
+not warn.</p>
+</div>
+<div id="unbalanced-panels" class="section level2">
+<h2>Unbalanced panels</h2>
+<p>Missing outcomes are supported. Group-period means are taken over the
+units observed at that period; autocovariances are divided by the number
+of residual pairs actually observed at each lag; and the variance of a
+group-period mean accounts for the overlap between the unit sets
+contributing at each pair of periods. All three reduce exactly to the
+complete-data formulas when nothing is missing, so there is one code
+path rather than two.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>gappy <span class="ot">&lt;-</span> sim_panel</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>gappy<span class="sc">$</span>y[<span class="fu">sample</span>(<span class="fu">nrow</span>(gappy), <span class="dv">100</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>fit_gap <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(gappy, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                         <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">c</span>(<span class="at">balanced =</span> fit<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">unbalanced =</span> fit_gap<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;   balanced unbalanced </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;  -16.63214  -16.63035</span></span></code></pre></div>
+<p>This is valid when missingness is independent of the outcome given
+group and period. Selection on outcomes is not addressed by any
+weighting scheme.</p>
+<p>A comparison referencing a group-period at which <em>no</em> unit is
+observed cannot be formed and is dropped, with a warning giving the
+count.</p>
+</div>
+<div id="partial-identification" class="section level2">
+<h2>Partial identification</h2>
+<p>A cohort-by-time effect with no clean comparison is not estimable.
+Such cells are reported as <code>NA</code> with
+<code>identified = FALSE</code>, never as an estimated zero, and are
+excluded from the parameter vector so that one unestimable cell does not
+disable the efficient weighting everywhere else.</p>
+<p>Where an unidentified cell carries positive aggregation weight, the
+aggregate itself is <code>NA</code>, and an identified-subset aggregate
+renormalised over the estimable cells is reported alongside it:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">names</span>(fit<span class="sc">$</span>aggregate<span class="sc">$</span>CW)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;estimate&quot;                &quot;std_error&quot;              </span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; [3] &quot;estimate_identified&quot;     &quot;std_error_identified&quot;   </span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [5] &quot;identified_weight_share&quot; &quot;weights&quot;</span></span></code></pre></div>
+</div>
+<div id="baseline-covariates" class="section level2">
+<h2>Baseline covariates</h2>
+<p><code>covar</code> takes a character vector of baseline,
+time-invariant covariate columns and applies the outcome-regression
+adjustment of Section 4.5 of the paper, so that parallel trends need
+hold only conditional on them.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>fit_cov <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(sim_panel, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                         <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                         <span class="at">covar =</span> <span class="fu">c</span>(<span class="st">&quot;x1&quot;</span>, <span class="st">&quot;x2&quot;</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>fit_cov<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>estimate</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; [1] -16.66011</span></span></code></pre></div>
+<p>If a supplied covariate is not in fact constant within unit, each
+affected unit’s value at its <strong>earliest observed period</strong>
+is used and a warning names the units. Earliest by time, not first by
+row: the answer does not depend on how the data were sorted.</p>
+<p>Where the adjustment cannot be identified for some control cohort and
+pair of periods – too few complete-case control units, or a
+rank-deficient fit – those comparisons alone revert to the unconditional
+form, and the count is reported in
+<code>fit$controls$cov_n_fallback</code>.</p>
+</div>
+<div id="testing-the-identifying-assumptions" class="section level2">
+<h2>Testing the identifying assumptions</h2>
+<p>The over-identifying restrictions are the pre-treatment placebo
+moments, whose expectation is zero only under parallel trends and no
+anticipation. <code>gmm_j_test()</code> tests them jointly, weighting
+them by the estimated serial-correlation model.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; Specification test for parallel trends and no anticipation</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   local pre-window (3 period(s) before adoption)</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt;   Base period       9</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;   Weighting         pooled Toeplitz (GMM-T)</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt;   Moments           14</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   J = 9.0396, df = 14, p = 0.8285</span></span></code></pre></div>
+<p>By default the test uses a local pre-window of three periods before
+each cohort’s adoption. Using every placebo restriction is also
+available, but a large number of restrictions degrades the chi-squared
+approximation when the number of units is small:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit, <span class="at">type =</span> <span class="st">&quot;full&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; Specification test for parallel trends and no anticipation</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   all pre-treatment placebo moments</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;   Base period       9</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt;   Weighting         pooled Toeplitz (GMM-T)</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;   Moments           70</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt;   J = 73.1373, df = 70, p = 0.3754</span></span></code></pre></div>
+<p>The test requires a never-treated group, since the event-study basis
+it uses differences every cohort against a common never-treated
+reference.</p>
+</div>
+<div id="a-real-design-and-a-coding-pitfall" class="section level2">
+<h2>A real design, and a coding pitfall</h2>
+<p><code>beck_banks</code> is a panel of 49 US states over 1976–2006 on
+bank branch deregulation and income inequality. It is also a worked
+example of the most common way a staggered design goes wrong.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">gmm_staggered</span>(beck_banks, <span class="at">yname =</span> <span class="st">&quot;ln_gini&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;wrkyr&quot;</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>              <span class="at">idname =</span> <span class="st">&quot;state&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;branch_reform&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; Error:</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; ! 13 unit(s) in cohort(s) 1960, 1970, 1975, 1976 are treated at or before the first observed period (1976). Such units have no pre-treatment period, so none of their cohort-by-time effects is identified, and including them would silently contaminate the aggregate.</span></span></code></pre></div>
+<p>Thirteen states deregulated at or before 1976, the first observed
+year, ten of them coded <code>1960</code>. They are treated throughout
+the window and have no pre-treatment period, so none of their effects is
+identified. Silently including them would return a plausible-looking
+aggregate contaminated by cells that were never estimated. Restrict to
+states adopting inside the window:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span> beck_banks[beck_banks<span class="sc">$</span>branch_reform <span class="sc">&gt;</span> <span class="dv">1976</span>, ]</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>fit_beck <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(dat, <span class="at">yname =</span> <span class="st">&quot;ln_gini&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;wrkyr&quot;</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>                          <span class="at">idname =</span> <span class="st">&quot;state&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;branch_reform&quot;</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; Warning: 144 of 380 cohort-by-time effect(s) have no clean comparison and are</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; reported as NA, not as an estimated zero. Affected: (g=1977, t=1999), (g=1977,</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; t=2000), (g=1977, t=2001), (g=1977, t=2002), (g=1977, t=2003), (g=1977,</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; t=2004), (g=1977, t=2005), (g=1977, t=2006), ... (144 total). A never-treated</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; control group, if available, would identify more.</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; Warning: The efficient GMM reweighting did not converge (termination:</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; singular_normal_equations) after 13 of at most 100 iteration(s), with a final</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; change of 5.13e+01. Estimates are the last valid iterate. Consider a larger</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; `max_iter`, a looser `tol`, or a more parsimonious `weighting`.</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>fit_beck</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; Staggered-adoption GMM estimator</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; Weighting: pooled Toeplitz (GMM-T)</span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt;   Units                       36</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt;   Periods                     31</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt;   Treated cohorts             18</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt;   CATTs (identified)    380 (236)</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt;   Clean comparisons         5829</span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt;   Moment-space rank          374</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt;   Iterations                  13</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt;   Converged                   no</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt;   Termination           singular_normal_equations</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; Treated-observation ATT           NA  (identified subset: 0.0390, se 2.0518, 60.8% of weight) </span></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; Cohort-equal ATT                  NA  (identified subset: 0.0364, se 2.8117, 57.8% of weight)</span></span></code></pre></div>
+<p>This design has no never-treated group either, so identification
+rests entirely on not-yet-treated controls. The consequence is visible
+in the output: the last cohort to adopt has no later cohort to serve as
+its control, so none of its effects is identified, and neither is any
+cell at a period after the final adoption year. Of the 380
+cohort-by-time cells, 144 are unestimable.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">table</span>(fit_beck<span class="sc">$</span>catt<span class="sc">$</span>identified)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt;   144   236</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>fit_beck<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>identified_weight_share</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt; [1] 0.6081633</span></span></code></pre></div>
+<p>Because unidentified cells carry positive weight, the aggregate
+itself is <code>NA</code> and the identified-subset figure is reported
+instead. That is the intended behaviour: an aggregate over a set of
+cells more than a third of which were never estimated would not mean
+what its name suggests. If a never-treated group is available in your
+own application, supplying it identifies far more of the surface.</p>
+</div>
+<div id="citation" class="section level2">
+<h2>Citation</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;staggeredGMM&quot;</span>)</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
