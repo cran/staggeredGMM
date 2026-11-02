@@ -369,6 +369,10 @@ errors);</li>
 <li>integer-valued time and cohort columns;</li>
 <li>the cohort constant within unit, with <code>0</code> for
 never-treated units;</li>
+<li>if never-treated units are coded <code>0</code>, period
+<code>0</code> not after the first observed period (otherwise
+<code>0</code> would also mean “first treated in period 0”; code
+never-treated units with any value after the last period instead);</li>
 <li>no period absent from the whole panel;</li>
 <li>no unit treated at or before the first observed period.</li>
 </ul>
@@ -566,6 +570,13 @@ pair of periods – too few complete-case control units, or a
 rank-deficient fit – those comparisons alone revert to the unconditional
 form, and the count is reported in
 <code>fit$controls$cov_n_fallback</code>.</p>
+<p>If a covariate has no observed value for any unit of a treated
+cohort, that cohort’s covariate mean is undefined and the estimator
+stops, naming the covariate and the cohort.</p>
+<p><strong>The specification test below does not adjust for
+covariates.</strong> It tests unconditional parallel trends, not the
+covariate-conditional parallel trends under which <code>fit_cov</code>
+is estimated; see the next section.</p>
 </div>
 <div id="testing-the-identifying-assumptions" class="section level2">
 <h2>Testing the identifying assumptions</h2>
@@ -574,7 +585,7 @@ moments, whose expectation is zero only under parallel trends and no
 anticipation. <code>gmm_j_test()</code> tests them jointly, weighting
 them by the estimated serial-correlation model.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit)</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; Specification test for parallel trends and no anticipation</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; Specification test for unconditional parallel trends and no anticipation</span></span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   local pre-window (3 period(s) before adoption)</span></span>
@@ -583,85 +594,92 @@ them by the estimated serial-correlation model.</p>
 <span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt;   Moments           14</span></span>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   J = 9.0396, df = 14, p = 0.8285</span></span></code></pre></div>
+<p><strong>The test is unconditional.</strong> Its placebo moments are
+unadjusted group means, whether or not the fitted model adjusts for
+covariates. After a fit with <code>covar</code>, it therefore tests
+unconditional parallel trends and no anticipation, not the
+covariate-conditional parallel trends assumption under which the effects
+were estimated. If covariates are distributed differently across
+cohorts, the test can reject although conditional parallel trends hold,
+and a non-rejection does not validate the conditional assumption. The
+printed result says so whenever the fit used covariates:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit_cov)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; Specification test for unconditional parallel trends and no anticipation</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   local pre-window (3 period(s) before adoption)</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;   Base period       9</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt;   Weighting         pooled Toeplitz (GMM-T)</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;   Moments           14</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt;   J = 8.7510, df = 14, p = 0.8467</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; ------------------------------------------------------------------------------</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; IMPORTANT: this model adjusts for covariates, but this test does not.</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; The placebo moments are unadjusted group means, so the test checks</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt; UNCONDITIONAL parallel trends and no anticipation. It does NOT test the</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; covariate-conditional parallel trends assumption under which the effects were</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; estimated. A rejection can reflect differences in covariates across cohorts</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; rather than a failure of that assumption, and a non-rejection does not</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; validate it.</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; ------------------------------------------------------------------------------</span></span></code></pre></div>
 <p>By default the test uses a local pre-window of three periods before
 each cohort’s adoption. Using every placebo restriction is also
 available, but a large number of restrictions degrades the chi-squared
 approximation when the number of units is small:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit, <span class="at">type =</span> <span class="st">&quot;full&quot;</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; Specification test for parallel trends and no anticipation</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   all pre-treatment placebo moments</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;   Base period       9</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt;   Weighting         pooled Toeplitz (GMM-T)</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;   Moments           70</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt;   J = 73.1373, df = 70, p = 0.3754</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">gmm_j_test</span>(fit, <span class="at">type =</span> <span class="st">&quot;full&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; Specification test for unconditional parallel trends and no anticipation</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; Hansen J on the pre-treatment placebo restrictions</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt;   Restriction set   all pre-treatment placebo moments</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt;   Base period       9</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt;   Weighting         pooled Toeplitz (GMM-T)</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;   Moments           70</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt;   J = 73.1373, df = 70, p = 0.3754</span></span></code></pre></div>
 <p>The test requires a never-treated group, since the event-study basis
 it uses differences every cohort against a common never-treated
 reference.</p>
 </div>
-<div id="a-real-design-and-a-coding-pitfall" class="section level2">
-<h2>A real design, and a coding pitfall</h2>
-<p><code>beck_banks</code> is a panel of 49 US states over 1976–2006 on
-bank branch deregulation and income inequality. It is also a worked
-example of the most common way a staggered design goes wrong.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">gmm_staggered</span>(beck_banks, <span class="at">yname =</span> <span class="st">&quot;ln_gini&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;wrkyr&quot;</span>,</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>              <span class="at">idname =</span> <span class="st">&quot;state&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;branch_reform&quot;</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; Error:</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; ! 13 unit(s) in cohort(s) 1960, 1970, 1975, 1976 are treated at or before the first observed period (1976). Such units have no pre-treatment period, so none of their cohort-by-time effects is identified, and including them would silently contaminate the aggregate.</span></span></code></pre></div>
-<p>Thirteen states deregulated at or before 1976, the first observed
-year, ten of them coded <code>1960</code>. They are treated throughout
-the window and have no pre-treatment period, so none of their effects is
-identified. Silently including them would return a plausible-looking
-aggregate contaminated by cells that were never estimated. Restrict to
-states adopting inside the window:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span> beck_banks[beck_banks<span class="sc">$</span>branch_reform <span class="sc">&gt;</span> <span class="dv">1976</span>, ]</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>fit_beck <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(dat, <span class="at">yname =</span> <span class="st">&quot;ln_gini&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;wrkyr&quot;</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>                          <span class="at">idname =</span> <span class="st">&quot;state&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;branch_reform&quot;</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; Warning: 144 of 380 cohort-by-time effect(s) have no clean comparison and are</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; reported as NA, not as an estimated zero. Affected: (g=1977, t=1999), (g=1977,</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; t=2000), (g=1977, t=2001), (g=1977, t=2002), (g=1977, t=2003), (g=1977,</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; t=2004), (g=1977, t=2005), (g=1977, t=2006), ... (144 total). A never-treated</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; control group, if available, would identify more.</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; Warning: The efficient GMM reweighting did not converge (termination:</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; singular_normal_equations) after 13 of at most 100 iteration(s), with a final</span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; change of 5.13e+01. Estimates are the last valid iterate. Consider a larger</span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; `max_iter`, a looser `tol`, or a more parsimonious `weighting`.</span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>fit_beck</span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; Staggered-adoption GMM estimator</span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; Weighting: pooled Toeplitz (GMM-T)</span></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt;   Units                       36</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt;   Periods                     31</span></span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt;   Treated cohorts             18</span></span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt;   CATTs (identified)    380 (236)</span></span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt;   Clean comparisons         5829</span></span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt;   Moment-space rank          374</span></span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt;   Iterations                  13</span></span>
-<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt;   Converged                   no</span></span>
-<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt;   Termination           singular_normal_equations</span></span>
-<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; Treated-observation ATT           NA  (identified subset: 0.0390, se 2.0518, 60.8% of weight) </span></span>
-<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; Cohort-equal ATT                  NA  (identified subset: 0.0364, se 2.8117, 57.8% of weight)</span></span></code></pre></div>
-<p>This design has no never-treated group either, so identification
-rests entirely on not-yet-treated controls. The consequence is visible
-in the output: the last cohort to adopt has no later cohort to serve as
-its control, so none of its effects is identified, and neither is any
-cell at a period after the final adoption year. Of the 380
-cohort-by-time cells, 144 are unestimable.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">table</span>(fit_beck<span class="sc">$</span>catt<span class="sc">$</span>identified)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt;   144   236</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>fit_beck<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>identified_weight_share</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt; [1] 0.6081633</span></span></code></pre></div>
-<p>Because unidentified cells carry positive weight, the aggregate
-itself is <code>NA</code> and the identified-subset figure is reported
-instead. That is the intended behaviour: an aggregate over a set of
-cells more than a third of which were never estimated would not mean
-what its name suggests. If a never-treated group is available in your
-own application, supplying it identifies far more of the surface.</p>
+<div id="two-coding-pitfalls" class="section level2">
+<h2>Two coding pitfalls</h2>
+<p>A unit treated at or before the first observed period has no
+pre-treatment period. Recoding the first cohort of
+<code>sim_panel</code> to adopt in period 1 shows what happens:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>bad <span class="ot">&lt;-</span> sim_panel</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>bad<span class="sc">$</span>cohort[bad<span class="sc">$</span>cohort <span class="sc">==</span> <span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="fu">gmm_staggered</span>(bad, <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>, <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>              <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>, <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; Error:</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; ! 10 unit(s) in cohort(s) 1 are treated at or before the first observed period (1). Such units have no pre-treatment period, so none of their cohort-by-time effects is identified, and including them would silently contaminate the aggregate.</span></span></code></pre></div>
+<p>Silently including such units would return a plausible-looking
+aggregate contaminated by cells that were never estimated, so the
+estimator stops and names the cohort. Drop those units, or restrict to
+cohorts adopting inside the window, before estimating.</p>
+<p>Without a never-treated group, identification rests entirely on
+not-yet-treated controls. Dropping the never-treated units of
+<code>sim_panel</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>fit_nyt <span class="ot">&lt;-</span> <span class="fu">gmm_staggered</span>(sim_panel[sim_panel<span class="sc">$</span>cohort <span class="sc">!=</span> <span class="dv">0</span>, ], <span class="at">yname =</span> <span class="st">&quot;y&quot;</span>,</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                         <span class="at">tname =</span> <span class="st">&quot;year&quot;</span>, <span class="at">idname =</span> <span class="st">&quot;unit_id&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>                         <span class="at">gname =</span> <span class="st">&quot;cohort&quot;</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; Warning: 60 of 90 cohort-by-time effect(s) have no clean comparison and are</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">#&gt; reported as NA, not as an estimated zero. Affected: (g=10, t=22), (g=10, t=23),</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt; (g=10, t=24), (g=10, t=25), (g=10, t=26), (g=10, t=27), (g=10, t=28), (g=10,</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; t=29), ... (60 total). A never-treated control group, if available, would</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; identify more.</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="fu">table</span>(fit_nyt<span class="sc">$</span>catt<span class="sc">$</span>identified)</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt;    60    30</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>fit_nyt<span class="sc">$</span>aggregate<span class="sc">$</span>CW<span class="sc">$</span>identified_weight_share</span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; [1] 0.3333333</span></span></code></pre></div>
+<p>The last cohort to adopt has no later cohort to serve as its control,
+so none of its effects is identified, and neither is any cell at or
+after its adoption period: only 30 of the 90 cells are estimable.
+Because unidentified cells carry positive weight, the aggregate itself
+is <code>NA</code> and the identified-subset figure is reported with the
+share of weight it covers. An aggregate over a set of cells two thirds
+of which were never estimated would not mean what its name suggests.</p>
 </div>
 <div id="citation" class="section level2">
 <h2>Citation</h2>

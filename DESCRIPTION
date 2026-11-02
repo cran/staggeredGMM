@@ -1,6 +1,6 @@
 Package: staggeredGMM
 Title: GMM Estimation of Treatment Effects Under Staggered Adoption
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person(given = "Rishabh", family = "Bijani",
            email = "rishabhbijani@gmail.com",
@@ -16,8 +16,8 @@ Description: Estimates cohort-by-time average treatment effects under
     pooled stationary covariance, a cohort-specific stationary covariance,
     and an unrestricted within-cohort covariance. Optional adjustment for
     baseline covariates by outcome regression, and a serial-correlation
-    robust over-identification test of parallel trends and no
-    anticipation, are also supported. The methods are described in Arora
+    robust over-identification test of unconditional parallel trends and
+    no anticipation, are also supported. The methods are described in Arora
     and Bijani (2026) <doi:10.2139/ssrn.6558759>.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -31,11 +31,11 @@ URL: https://github.com/RishabhBijani/staggeredGMM
 BugReports: https://github.com/RishabhBijani/staggeredGMM/issues
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-09-06 17:00:22 UTC; rishabhbijani
+Packaged: 2026-11-02 15:06:14 UTC; rishabhbijani
 Author: Rishabh Bijani [aut, cre, cph] (ORCID:
     <https://orcid.org/0009-0003-9636-1774>),
   Parush Arora [aut, cph] (ORCID:
     <https://orcid.org/0009-0004-6571-3850>)
 Maintainer: Rishabh Bijani <rishabhbijani@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-09-15 11:00:10 UTC
+Date/Publication: 2026-11-02 15:40:02 UTC

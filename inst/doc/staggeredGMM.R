@@ -54,24 +54,26 @@ fit_cov$aggregate$CW$estimate
 ## ----jtest--------------------------------------------------------------------
 gmm_j_test(fit)
 
+## ----jtest-cov----------------------------------------------------------------
+gmm_j_test(fit_cov)
+
 ## ----jtest-full---------------------------------------------------------------
 gmm_j_test(fit, type = "full")
 
-## ----beck-pitfall, error = TRUE-----------------------------------------------
+## ----pitfall-always, error = TRUE---------------------------------------------
 try({
-gmm_staggered(beck_banks, yname = "ln_gini", tname = "wrkyr",
-              idname = "state", gname = "branch_reform")
+bad <- sim_panel
+bad$cohort[bad$cohort == 10] <- 1
+gmm_staggered(bad, yname = "y", tname = "year",
+              idname = "unit_id", gname = "cohort")
 })
 
-## ----beck-fixed---------------------------------------------------------------
-dat <- beck_banks[beck_banks$branch_reform > 1976, ]
-fit_beck <- gmm_staggered(dat, yname = "ln_gini", tname = "wrkyr",
-                          idname = "state", gname = "branch_reform")
-fit_beck
-
-## ----beck-identified----------------------------------------------------------
-table(fit_beck$catt$identified)
-fit_beck$aggregate$CW$identified_weight_share
+## ----pitfall-never------------------------------------------------------------
+fit_nyt <- gmm_staggered(sim_panel[sim_panel$cohort != 0, ], yname = "y",
+                         tname = "year", idname = "unit_id",
+                         gname = "cohort")
+table(fit_nyt$catt$identified)
+fit_nyt$aggregate$CW$identified_weight_share
 
 ## ----citation, eval = FALSE---------------------------------------------------
 # citation("staggeredGMM")
